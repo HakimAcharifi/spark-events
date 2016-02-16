@@ -31,7 +31,7 @@ le schema d'execution est le suivant :
   dans ce scenario un shuffle intervient au niveau du groupBy. Ce shuffle contraint spark a executer et finir
   toutes les transformations du stage precedent avant de passer au stage suivant qui commence apres le groupBy.
   la consequence de ce model est que tous les messages a la sortie du filter veront tous les effets induits
-  par chacun d'entre eux dans le stage precedent. Donc tous les TXEvent devront voir les modifications effectuees
+  par chacun d'entre eux dans le stage suivant. Donc tous les TXEvent devront voir les modifications effectuees
   par l'event DBUpdateEvent dans cassandra et ce quelque soit le temps que cette operation necessite.
    
    
