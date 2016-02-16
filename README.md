@@ -23,7 +23,7 @@ le schema d'execution est le suivant :
   
   dans ce cas de figure, certains TXEvent ne veront pas les effets induits par l'event DBUpdateEvent
   dans cassandra avant de finir leur course dans le foreach
-  
+
 2. Deuxieme cas : traitement avec shuffle (voir MapWaitEventProcessing)
 
   kafka ---> map ---> map ---> filter ---> groupBy ---> flatMap ---> map ---> reduce ---> foreach
@@ -34,5 +34,7 @@ le schema d'execution est le suivant :
   par chacun d'entre eux dans le stage suivant. Donc tous les TXEvent devront voir les modifications effectuees
   par l'event DBUpdateEvent dans cassandra et ce quelque soit le temps que cette operation necessite.
    
-   
-
+  Ci-dessous les screnshots des differents stages des deux jobs
+  
+  ![no wait](img/nowaitmap.png)
+  ![wait with shuffle](img/waitmap.png)
