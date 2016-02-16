@@ -59,16 +59,7 @@ with KafkaEventProducer {
     listEvents = dBUpdateEvent :: listEvents
 
     // wait until all events get sent
-    Await.ready(Future.sequence(sendToKafka(getKafkaProducerParams, topic, listEvents)), 10 seconds)
-  }
-
-  val getKafkaProducerParams = {
-    val kafkaProducerConfig = new Properties()
-    kafkaProducerConfig.setProperty("zookeeper.connect", "localhost:2181")
-    kafkaProducerConfig.setProperty("bootstrap.servers", "localhost:9092")
-    kafkaProducerConfig.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-    kafkaProducerConfig.setProperty("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-    kafkaProducerConfig
+    Await.ready(Future.sequence(sendToKafka(topic, listEvents)), 10 seconds)
   }
 
   def createTopic(topic: String, nbPartitions: Int): Unit = {

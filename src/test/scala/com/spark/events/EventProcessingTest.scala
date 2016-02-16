@@ -45,7 +45,7 @@ class EventProcessingTest extends TestBase {
     // create topic with 4 partitions
     createTopic(topic, 4)
     // first send some event to kafka
-    generateEvents(50, topic)
+    generateEvents(100, topic)
     // start event processing
     Future(MapWaitEventProcessing.startProcess(paramsMap))
 
@@ -81,7 +81,7 @@ class EventProcessingTest extends TestBase {
     // create topic with 4 partitions
     createTopic(topic, 4)
     // first send some event to kafka
-    generateEvents(50, topic)
+    generateEvents(100, topic)
     // start event processing
     Future(NoMapWaitEventProcessing.startProcess(paramsMap))
 

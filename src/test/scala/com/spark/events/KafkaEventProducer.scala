@@ -23,52 +23,62 @@ import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecor
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{Future, Promise}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object KafkaEventProducer {
-
-
+  val kafkaProducerConfig = new Properties()
+  kafkaProducerConfig.setProperty("zookeeper.connect", "localhost:2181")
+  kafkaProducerConfig.setProperty("bootstrap.servers", "localhost:9092")
+  kafkaProducerConfig.setProperty("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+  kafkaProducerConfig.setProperty("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+  val logger = LoggerFactory.getLogger(classOf[KafkaEventProducer])
+  val producer = new KafkaProducer[String, String](kafkaProducerConfig)
 }
+
 trait KafkaEventProducer extends EventsTrait {
 
-  def sendToKafka(kafkaProducerParams: Properties, topic: String, event: Event): Future[RecordMetadata] = {
-    val logger = LoggerFactory.getLogger(classOf[KafkaEventProducer])
-    val producer = new KafkaProducer[String, String](kafkaProducerParams)
+  import KafkaEventProducer._
+
+  def sendToKafka(topic: String, event: Event): Future[RecordMetadata] = {
+
     val promise = Promise[RecordMetadata]
-    producer.send(new ProducerRecord[String, String](topic, event.id, event.value), new Callback {
-      override def onCompletion(metadata: RecordMetadata, exception: Exception) = {
-        Option(exception) match {
-          case Some(ex) => {
-            promise.failure(ex)
-            logger.error("an error occurred while sending message to kafka: [{}]", ex.getMessage)
-          }
-          case _ => {
-            promise.success(metadata)
-            val logParams = List(event.id, event.value, metadata.topic, metadata.partition, metadata.offset)
-            logger.debug(
-              """
-                |Event {
-                | key : {},
-                | value : {},
-                | topic : {},
-                | partition : {},
-                | offset : {}
-                |}
-                |successfully sent to kafka
-              """.stripMargin, logParams.toSeq.asInstanceOf[Seq[AnyRef]]: _*
-            )
+
+    Future(producer.send(new ProducerRecord[String, String](topic, event.id, event.value),
+      new Callback {
+        override def onCompletion(metadata: RecordMetadata, exception: Exception) = {
+          Option(exception) match {
+            case Some(ex) => {
+              promise.failure(ex)
+              logger.error("an error occurred while sending message to kafka: [{}]", ex.getMessage)
+            }
+            case _ => {
+              promise.success(metadata)
+              val logParams = List(event.id, event.value, metadata.topic, metadata.partition, metadata.offset)
+              logger.debug(
+                """
+                  |Event {
+                  | key : {},
+                  | value : {},
+                  | topic : {},
+                  | partition : {},
+                  | offset : {}
+                  |}
+                  |successfully sent to kafka
+                """.stripMargin, logParams.toSeq.asInstanceOf[Seq[AnyRef]]: _*
+              )
+            }
           }
         }
-      }
-    })
+      }))
     promise.future
   }
 
-  def sendToKafka(kafkaProducerParams: Properties, topic: String, events: List[Event]): List[Future[RecordMetadata]] = {
+  def sendToKafka(topic: String, events: List[Event]): List[Future[RecordMetadata]] = {
 
     def recurSendToKafka(remainingMsgList: List[Event], accumulo: List[Future[RecordMetadata]]): List[Future[RecordMetadata]] = {
       remainingMsgList match {
         case Nil => accumulo
-        case head :: xs => recurSendToKafka(xs, sendToKafka(kafkaProducerParams, topic, head) :: accumulo)
+        case head :: xs => recurSendToKafka(xs, sendToKafka(topic, head) :: accumulo)
       }
     }
     recurSendToKafka(events, Nil)
