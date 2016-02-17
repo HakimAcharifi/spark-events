@@ -40,13 +40,11 @@ with KafkaEventProducer {
 
   override def beforeAll(): Unit = {
     startEmbeddedServers()
-    //startCassandra()
     initDb()
   }
 
   override def afterAll(): Unit = {
     stopEmbeddedServers()
-    stopCassandra()
   }
 
   def generateEvents(nbEvents: Int, topic: String): Unit = {

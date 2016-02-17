@@ -16,11 +16,8 @@
  */
 package com.spark.events.data
 
-import com.datastax.driver.core.PreparedStatement
-
 trait Queries {
 
-  var statementsMap = Map.empty[String, PreparedStatement]
   val KEYSPACE = "poctu"
   val CASSANDRA_NODES = "localhost"
   val PORT = 9042

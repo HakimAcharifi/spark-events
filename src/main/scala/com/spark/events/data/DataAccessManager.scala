@@ -59,7 +59,7 @@ trait DataAccessManager extends Queries {
     })
   }
 
-  def executeWithSession[T](query: Session => T): T = {
+  private def executeWithSession[T](query: Session => T): T = {
     val cluster = Cluster.builder().addContactPoints(CASSANDRA_NODES.split(",").map(_.trim).toList: _*)
       .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.QUORUM))
       .withPort(PORT).build()
@@ -70,7 +70,7 @@ trait DataAccessManager extends Queries {
     result
   }
 
-  def closeQuietly(session: Session): Unit = {
+  private def closeQuietly(session: Session): Unit = {
     try {
       session.close()
     }catch {
@@ -78,7 +78,7 @@ trait DataAccessManager extends Queries {
     }
   }
 
-  def closeQuietly(cluster: Cluster): Unit = {
+  private def closeQuietly(cluster: Cluster): Unit = {
     try {
       cluster.close()
     }catch {

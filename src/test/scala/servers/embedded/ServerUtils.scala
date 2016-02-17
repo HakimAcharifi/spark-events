@@ -18,7 +18,7 @@ package servers.embedded
 
 import java.util.Properties
 
-import org.slf4j.{LoggerFactory, Logger}
+import org.slf4j.LoggerFactory
 
 trait ServerUtils {
 
